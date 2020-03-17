@@ -232,8 +232,7 @@ foldr f b (x :. xs) = f x (foldr f b xs)
   Реализуйте с помощью `foldr`.
 -}
 map :: (a -> b) -> List a -> List b
-map f Nil = Nil
-map f (x :. xs) = f x :. map f xs
+map f list = foldr (\x a -> f x :. a) Nil list
 
 {-
   `filter` принимает предикат `f` и список, возвращая список с элементами
@@ -246,11 +245,7 @@ map f (x :. xs) = f x :. map f xs
   Реализуйте с помощью `foldr`.
 -}
 filter :: (a -> Bool) -> List a -> List a
-filter f Nil = Nil
-filter f (x :. xs) = if f x
-  then x :. n
-  else n
-  where n = filter f xs
+filter f list = foldr (\x a -> if f x then x :. a else a) Nil list
 
 {-
   Правая свёртка действует на список справа, с конца.
@@ -305,7 +300,6 @@ foldl f b (x :. xs) = foldl f (f b x) xs
   Реализуйте с помощью `foldl`.
 -}
 reverse :: List a -> List a
-reverse Nil = Nil
 reverse x = foldl (\a n -> n :. a) Nil x
 
 {-
