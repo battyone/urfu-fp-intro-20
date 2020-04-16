@@ -130,6 +130,14 @@ module Lecture06 where
   если нет, то докажите это (напишите, почему)
 
   *Решение*
+
+    Г |- x x : T        Г |- x x : T
+  ----------------  ,  --------------
+  Г |- x : T' -> T       Г |- x : T'
+  -----------------------------------
+              T' -> T === T'
+
+               противоречие
 -}
 -- </Задачи для самостоятельного решения>
 
@@ -327,6 +335,14 @@ module Lecture06 where
   и запишите все шаги β-редукции ->β.
 
   selfApp id = ... ->β ...
+
+  *Решение*
+
+  selfApp id = (λx:∀X.X->X.x [∀Y.Y->Y] x) (id:∀Z.Z->Z) ->β
+               (λx:(∀Y.Y->Y)->(∀Y.Y->Y).x x) (id:∀Z.Z->Z) ->
+               id id
+
+
 -}
 -- </Задачи для самостоятельного решения>
 
@@ -578,16 +594,16 @@ module Lecture06 where
 -}
 
 f :: [a] -> Int
-f = error "not implemented"
+f = length
 
 g :: (a -> b)->[a]->[b]
-g = error "not implemented"
+g = map
 
 q :: a -> a -> a
-q x y = error "not implemented"
+q x y = x
 
 p :: (a -> b) -> (b -> c) -> (a -> c)
-p f g = error "not implemented"
+p f g = g.f
 
 {-
   Крестики-нолики Чёрча.
@@ -624,7 +640,10 @@ createRow x y z = \case
   Third -> z
 
 createField :: Row -> Row -> Row -> Field
-createField x y z = error "not implemented"
+createField x y z = \case
+                    First -> x
+                    Second -> y
+                    Third -> z
 
 -- Чтобы было с чего начинать проверять ваши функции
 emptyField :: Field
@@ -633,17 +652,37 @@ emptyField = createField emptyLine emptyLine emptyLine
     emptyLine = createRow Empty Empty Empty
 
 setCellInRow :: Row -> Index -> Value -> Row
-setCellInRow r i v = error "not implemented"
+setCellInRow r i v = \x -> if i == x then v else r x
 
 -- Возвращает новое игровое поле, если клетку можно занять.
 -- Возвращает ошибку, если место занято.
 setCell :: Field -> Index -> Index -> Value -> Either String Field
-setCell field i j v = error "not implemented"
+setCell field i j v = if (field i j) == Empty
+    then Right (\a -> if i == a then setCellInRow (field a) j v else field a)
+    else Left ("There is '" ++ show (field i j) ++ "' on " ++ show i ++ " " ++ show j)
 
 data GameState = InProgress | Draw | XsWon | OsWon deriving (Eq, Show)
 
 getGameState :: Field -> GameState
-getGameState field = error "not implemented"
+getGameState field
+    | won Cross field = XsWon
+    | won Zero field = OsWon
+    | anyEmpty field = InProgress
+    | otherwise = Draw
+    where
+    indexList = First : Second : Third : []
+    diagonal1 f = map (\i -> f i i) indexList
+    diagonal2 f = [f First Third, f Second Second, f Third First]
+    row r f = map (\i -> f r i) indexList
+    column c f = map(\i -> f i c) indexList
+    won v f =
+        all (== v) (diagonal1 f) ||
+        all (== v) (diagonal2 f) ||
+        any (== True) (map (\i -> all (==v) (row i f)) indexList) ||
+        any (== True) (map (\i -> all (==v) (column i f)) indexList)
+    flatten xss = [ x | xs <- xss, x <- xs ]
+    anyEmpty f = any (== Empty) (flatten (map (\i -> map (\j -> f i j) indexList) indexList))
+
 
 -- </Задачи для самостоятельного решения>
 
