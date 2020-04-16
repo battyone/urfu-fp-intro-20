@@ -123,6 +123,6 @@ allCountries =
 
 stat :: [Country] -> [Country]
 stat events =
-  let getCount (name) = sum(map (\(Country name count) -> if name == name then count else 0) events)
+  let getCount (name1) = sum(map (\(Country name count) -> if name1 == name then count else 0) events)
   in map (\(Country name _) -> Country name (getCount name)) allCountries
 -- </Задачи для самостоятельного решения>
